@@ -30,6 +30,7 @@ export function DriveListRow({
           row.subtitle,
           row.distance,
           consumption.text,
+          row.cost,
         ].join(", ")
       }
       onPress={() => router.push(targetHref(row.target, stack))}
@@ -52,6 +53,9 @@ export function DriveListRow({
             }
           >
             {consumption.text}
+          </Text>
+          <Text variant="caption" numberOfLines={1}>
+            {row.cost}
           </Text>
         </>
       }

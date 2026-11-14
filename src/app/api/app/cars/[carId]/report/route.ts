@@ -10,7 +10,7 @@ export async function GET(
 ) {
   const context = await appContext(params);
   if (!context) return appNotFound();
-  const { car, f, now, showMaps } = context;
+  const { car, f, now, showMaps, preferences } = context;
   const search = new URL(request.url).searchParams;
   const range = tripRange(
     search.get("from"),
@@ -41,6 +41,7 @@ export async function GET(
       car,
       f,
       now,
+      preferences.chargePrice,
     ),
   );
 }

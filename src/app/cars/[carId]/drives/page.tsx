@@ -27,9 +27,10 @@ import {
   tripSegments,
   tripSummary,
 } from "@/lib/trip";
+import { tripDrivingCost } from "@/lib/drive-cost";
 import { recentTrips } from "@/lib/trip-data";
 import { cn } from "@/lib/utils";
-import { getFormatter } from "@/lib/viewer";
+import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
 
@@ -58,7 +59,11 @@ function DriveConsumption({
 export default async function DrivesPage({
   params,
 }: PageProps<"/cars/[carId]/drives">) {
-  const [car, f] = await Promise.all([requireCar(params), getFormatter()]);
+  const [car, f, preferences] = await Promise.all([
+    requireCar(params),
+    getFormatter(),
+    getPreferences(),
+  ]);
   const trips = (await recentTrips(car)).map((trip) => ({
     trip,
     summary: tripSummary(trip),
@@ -161,6 +166,11 @@ export default async function DrivesPage({
                           >
                             {f.efficiency(summary.consumptionWhPerKm)}
                           </DriveConsumption>
+                          <p className="text-xs text-subtle">
+                            {f.cost(
+                              tripDrivingCost(trip, preferences.chargePrice),
+                            )}
+                          </p>
                         </div>
                       </Link>
                     </li>

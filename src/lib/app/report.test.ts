@@ -92,6 +92,7 @@ describe("reportPage", () => {
       car,
       f,
       now,
+      0.3,
     );
     expect(page.from).toBe("2026-10-12");
     expect(page.presets[0]?.label).toBe("Last 7 days");
@@ -143,6 +144,7 @@ describe("reportPage", () => {
       car,
       f,
       now,
+      null,
     );
     expect(empty.routes).toBeNull();
     expect(empty.notice).toBe("No drive and no charge in this range.");
@@ -159,6 +161,7 @@ describe("reportPage", () => {
       car,
       f,
       now,
+      null,
     );
     expect(bad.notice).toContain("366 days");
   });

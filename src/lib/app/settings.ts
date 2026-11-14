@@ -184,7 +184,7 @@ export function settingsPage(
             "chargePrice",
             "Price per kWh",
             preferences,
-            "The app multiplies the energy from the charger by this price.",
+            "The app multiplies energy from the charger and from driving by this price.",
           ),
           price(
             "fastChargePrice",

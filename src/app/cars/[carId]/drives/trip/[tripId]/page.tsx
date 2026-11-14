@@ -7,6 +7,7 @@ import { Stat } from "@/components/overview/stat";
 import { PageTransition } from "@/components/page-transition";
 import { TripRow } from "@/components/trip-row";
 import { assessConsumption, ratedWhPerKm } from "@/lib/assessment";
+import { driveCost } from "@/lib/drive-cost";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
 import type { Formatter } from "@/lib/format";
@@ -37,10 +38,12 @@ function StepRow({
   step,
   base,
   f,
+  pricePerKwh,
 }: {
   step: TripStep;
   base: string;
   f: Formatter;
+  pricePerKwh: number | null;
 }) {
   if (step.kind === "leg") {
     const { leg } = step;
@@ -51,7 +54,15 @@ function StepRow({
         icon={Route}
         tone="drive"
         title={`${leg.from} → ${leg.to}`}
-        detail={`${f.distance(leg.distanceKm)} · ${f.duration(leg.durationMin)} · ${f.efficiency(leg.consumptionWhPerKm)}`}
+        detail={`${f.distance(leg.distanceKm)} · ${f.duration(leg.durationMin)} · ${f.efficiency(leg.consumptionWhPerKm)} · ${f.cost(
+          driveCost(
+            {
+              distanceKm: leg.distanceKm,
+              efficiencyWhPerKm: leg.consumptionWhPerKm,
+            },
+            pricePerKwh,
+          ),
+        )}`}
       />
     );
   }
@@ -176,7 +187,12 @@ export default async function TripPage({
       <ul className="mt-10 space-y-1">
         {tripSteps(trip).map((step) => (
           <li key={`${step.kind}-${step.at.getTime()}`}>
-            <StepRow step={step} base={base} f={f} />
+            <StepRow
+              step={step}
+              base={base}
+              f={f}
+              pricePerKwh={preferences.chargePrice}
+            />
           </li>
         ))}
       </ul>

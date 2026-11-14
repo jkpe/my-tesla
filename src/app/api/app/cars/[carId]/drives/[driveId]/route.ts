@@ -15,5 +15,7 @@ export async function GET(
     context && id !== null ? await findDrive(context.car, id) : null;
   if (!context || !found) return appNotFound();
   const { car, f, now, showMaps } = context;
-  return appJson(driveDetail(found, car, f, now, showMaps));
+  return appJson(
+    driveDetail(found, car, f, now, showMaps, context.preferences.chargePrice),
+  );
 }

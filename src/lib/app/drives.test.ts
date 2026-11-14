@@ -89,7 +89,7 @@ const trips = buildTrips(
 
 describe("driveList", () => {
   test("groups trips by day and links a one-drive trip to its drive", () => {
-    const list = driveList(trips, car, f, now);
+    const list = driveList(trips, car, f, now, 0.3);
     expect(list.summary).toEqual(["2 recent trips", "360 km"]);
     expect(list.sections).toHaveLength(1);
     expect(list.sections[0]!.total).toEqual(["2 trips", "360 km"]);
@@ -101,6 +101,7 @@ describe("driveList", () => {
       title: "Ankara",
       subtitle: "from Istanbul · 1 stop, 1 with a charge",
       distance: "240 km",
+      cost: "10.80",
     });
     expect(roadRow?.segments.map((segment) => segment.kind)).toEqual([
       "drive",
@@ -123,13 +124,16 @@ describe("driveList", () => {
       [{ ...errand, efficiencyWhPerKm: 260 }],
       [],
     );
-    const [row] = driveList(thirsty, car, f, now).sections[0]!.rows;
+    const [row] = driveList(thirsty, car, f, now, null).sections[0]!.rows;
     expect(row?.consumption.tone).toBe("bad");
     expect(row?.consumption.note).toContain("rated value");
   });
 
   test("gives no summary without trips", () => {
-    expect(driveList([], car, f, now)).toEqual({ summary: [], sections: [] });
+    expect(driveList([], car, f, now, null)).toEqual({
+      summary: [],
+      sections: [],
+    });
   });
 });
 
@@ -167,7 +171,7 @@ describe("driveDetail", () => {
   };
 
   test("names the drive, warns about an open drive, and builds three charts", () => {
-    const detail = driveDetail(found, car, f, now, true);
+    const detail = driveDetail(found, car, f, now, true, 0.25);
     expect(detail.title).toBe("Bolu");
     expect(detail.subtitle).toBe(
       "from Istanbul · Today 09:00 to 11:00 · 18 °C outside",
@@ -178,6 +182,11 @@ describe("driveDetail", () => {
       "Elevation (m)",
       "Battery (%)",
     ]);
+    expect(detail.stats.find((stat) => stat.label === "Cost")).toEqual({
+      label: "Cost",
+      value: { text: "4.50", tone: null, note: null },
+      detail: "At your price per kWh",
+    });
     expect(detail.stats.find((stat) => stat.label === "Battery")).toEqual({
       label: "Battery",
       value: { text: "90% → 55%", tone: null, note: null },
@@ -187,7 +196,7 @@ describe("driveDetail", () => {
   });
 
   test("leaves out the route when maps are hidden", () => {
-    expect(driveDetail(found, car, f, now, false).route).toBeNull();
+    expect(driveDetail(found, car, f, now, false, null).route).toBeNull();
   });
 
   test("leaves out the peak power without a power record", () => {
@@ -238,7 +247,7 @@ describe("tripDetail", () => {
         ] as [number, number][],
       ],
     ]);
-    const detail = tripDetail(trips[1]!, routes, car, f, now, true);
+    const detail = tripDetail(trips[1]!, routes, car, f, now, true, 0.2);
     expect(detail.title).toBe("Ankara");
     expect(detail.steps.map((step) => [step.kind, step.target])).toEqual([
       ["drive", { kind: "drive", id: 11 }],
@@ -257,7 +266,7 @@ describe("tripDetail", () => {
       "end",
     ]);
     expect(detail.markers?.[0]).toMatchObject({ longitude: 29, latitude: 41 });
-    const hidden = tripDetail(trips[1]!, routes, car, f, now, false);
+    const hidden = tripDetail(trips[1]!, routes, car, f, now, false, null);
     expect(hidden.routes).toBeNull();
     expect(hidden.markers).toBeNull();
   });

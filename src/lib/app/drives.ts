@@ -1,5 +1,6 @@
 import { assessConsumption, ratedWhPerKm } from "../assessment";
 import { tripsDayTotal } from "../day-total";
+import { driveCost, driveCostDetail, tripDrivingCost } from "../drive-cost";
 import type { DriveEnergy, DrivePoint } from "../drive-series";
 import type { Formatter } from "../format";
 import { tripMarkers } from "../map-points";
@@ -46,6 +47,7 @@ export function tripRow(
   trip: Trip,
   rated: number | null,
   f: Formatter,
+  pricePerKwh: number | null,
 ): DriveRow {
   const summary = tripSummary(trip);
   const clock = f.clock(trip.startAt);
@@ -57,6 +59,7 @@ export function tripRow(
     f.efficiency(summary.consumptionWhPerKm),
     assessConsumption(summary.consumptionWhPerKm, rated, f, summary.distanceKm),
   );
+  const cost = f.cost(tripDrivingCost(trip, pricePerKwh));
   return {
     key: `trip-${trip.id}`,
     target: tripTarget(trip),
@@ -67,6 +70,7 @@ export function tripRow(
     segments: tripSegments(trip),
     distance,
     consumption,
+    cost,
     label: spokenLabel([
       clock,
       duration,
@@ -74,6 +78,7 @@ export function tripRow(
       subtitle,
       distance,
       consumption.text,
+      cost,
     ]),
   };
 }
@@ -83,6 +88,7 @@ export function driveList(
   car: Car,
   f: Formatter,
   now: Date,
+  pricePerKwh: number | null,
 ): DriveList {
   const rated = ratedWhPerKm(car);
   const summaries = trips.map((trip) => ({ trip, summary: tripSummary(trip) }));
@@ -108,7 +114,9 @@ export function driveList(
           title: group.label,
           total,
           label: spokenLabel([group.label, ...total]),
-          rows: group.items.map(({ trip }) => tripRow(trip, rated, f)),
+          rows: group.items.map(({ trip }) =>
+            tripRow(trip, rated, f, pricePerKwh),
+          ),
         };
       }),
   };
@@ -185,6 +193,7 @@ export function driveDetail(
   f: Formatter,
   now: Date,
   showMaps: boolean,
+  pricePerKwh: number | null,
 ): DriveDetail {
   const { drive, route, series, energy } = found;
   const hasSeries = series.length > 1;
@@ -207,6 +216,9 @@ export function driveDetail(
           f,
           drive.distanceKm,
         ),
+      }),
+      appStat("Cost", f.cost(driveCost(drive, pricePerKwh)), {
+        detail: driveCost(drive, pricePerKwh) === null ? null : driveCostDetail,
       }),
       appStat("Battery", levelsText(drive.startLevel, drive.endLevel), {
         detail: levelsUsedText(drive.startLevel, drive.endLevel),
@@ -247,6 +259,7 @@ export function tripDetail(
   f: Formatter,
   now: Date,
   showMaps: boolean,
+  pricePerKwh: number | null,
 ): TripDetail {
   const summary = tripSummary(trip);
   return {
@@ -297,6 +310,15 @@ export function tripDetail(
           f.distance(leg.distanceKm),
           f.duration(leg.durationMin),
           f.efficiency(leg.consumptionWhPerKm),
+          f.cost(
+            driveCost(
+              {
+                distanceKm: leg.distanceKm,
+                efficiencyWhPerKm: leg.consumptionWhPerKm,
+              },
+              pricePerKwh,
+            ),
+          ),
         ]);
         return {
           key: `leg-${leg.driveId}`,
