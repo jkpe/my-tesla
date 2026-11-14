@@ -120,6 +120,8 @@ describe("liveView", () => {
     expect(view.route?.distanceKm).toBeCloseTo(10, 3);
     expect(view.route?.batteryAtArrival).toBe(73);
     expect(view.route?.trafficDelayMin).toBe(2);
+    expect(view.route?.latitude).toBe(1);
+    expect(view.route?.longitude).toBe(2);
   });
 
   test("reads an update and tire warnings", () => {

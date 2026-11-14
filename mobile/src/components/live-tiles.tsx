@@ -1,4 +1,5 @@
 import type { OverviewPage } from "@contract";
+import { LiveDriving } from "./live-driving";
 import { StyleSheet, View } from "react-native";
 import { chargeLeftText } from "@/format";
 import { useNow } from "@/hooks/use-now";
@@ -12,6 +13,17 @@ import { Panel } from "./panel";
 import { Text } from "./text";
 
 const countdownMs = 15_000;
+
+export function LiveOverview({
+  live,
+  carName,
+}: {
+  live: NonNullable<OverviewPage["live"]>;
+  carName: string;
+}) {
+  if (live.driving) return <LiveDriving live={live} carName={carName} />;
+  return <LivePanel live={live} />;
+}
 
 export function LivePanel({
   live,
