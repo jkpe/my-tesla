@@ -26,6 +26,7 @@ import type {
   OverviewPage,
   RecentRecord,
 } from "./contract";
+import { liveDrivingLayout } from "./live-driving";
 import { appStat, appValue } from "./values";
 
 export type OverviewInput = {
@@ -310,6 +311,10 @@ export function overviewPage(
             empty: live.hasValues
               ? null
               : `No live values yet. TeslaMate sends them when ${car.name} is online.`,
+            driving:
+              liveNow && live.hasValues
+                ? liveDrivingLayout(liveNow, f, snapshot, input.showMaps)
+                : null,
           }
         : null,
     history:

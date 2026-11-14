@@ -9,12 +9,14 @@ type LiveTires = {
   rearRight: number;
 };
 
-type LiveRoute = {
+export type LiveRoute = {
   destination: string;
   distanceKm: number | null;
   minutesToArrival: number | null;
   batteryAtArrival: number | null;
   trafficDelayMin: number | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export type LiveView = {
@@ -144,6 +146,28 @@ function openParts(values: LiveValues): string[] {
   return parts;
 }
 
+function routeLocation(
+  source: Record<string, unknown>,
+): Pick<LiveRoute, "latitude" | "longitude"> {
+  const location = source.location;
+  if (!location || typeof location !== "object" || Array.isArray(location)) {
+    return { latitude: null, longitude: null };
+  }
+  const point = location as Record<string, unknown>;
+  const latitude = point.latitude;
+  const longitude = point.longitude;
+  return {
+    latitude:
+      typeof latitude === "number" && Number.isFinite(latitude)
+        ? latitude
+        : null,
+    longitude:
+      typeof longitude === "number" && Number.isFinite(longitude)
+        ? longitude
+        : null,
+  };
+}
+
 function route(values: LiveValues): LiveRoute | null {
   const source = record(values.active_route);
   if (!source || source.error) return null;
@@ -157,6 +181,7 @@ function route(values: LiveValues): LiveRoute | null {
     minutesToArrival: field(source, "minutes_to_arrival"),
     batteryAtArrival: field(source, "energy_at_arrival"),
     trafficDelayMin: field(source, "traffic_minutes_delay"),
+    ...routeLocation(source),
   };
 }
 
