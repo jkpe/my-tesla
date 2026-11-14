@@ -354,6 +354,22 @@ export type CarImageFrame = {
   height: number;
 };
 
+export type OverviewLiveTile = {
+  key: string;
+  icon: LiveIcon;
+  title: string;
+  detail: string | null;
+  tone: LiveTone;
+  fullAt: string | null;
+};
+
+export type OverviewLiveDriving = {
+  map: { latitude: number; longitude: number } | null;
+  speed: AppStat;
+  destination: { title: string; detail: string | null } | null;
+  tiles: OverviewLiveTile[];
+};
+
 export type OverviewPage = {
   car: {
     id: number;
@@ -378,16 +394,10 @@ export type OverviewPage = {
   stats: AppStat[];
   live: {
     connected: boolean;
-    tiles: {
-      key: string;
-      icon: LiveIcon;
-      title: string;
-      detail: string | null;
-      tone: LiveTone;
-      fullAt: string | null;
-    }[];
+    tiles: OverviewLiveTile[];
     notices: string[];
     empty: string | null;
+    driving: OverviewLiveDriving | null;
   } | null;
   today: AppDayStrip | null;
   tires: {

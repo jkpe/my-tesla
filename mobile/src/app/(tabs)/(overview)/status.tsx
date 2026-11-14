@@ -5,7 +5,7 @@ import { useOverview } from "@/api/queries";
 import { useCar } from "@/car/car-provider";
 import { Button } from "@/components/button";
 import { DayStrip } from "@/components/day-strip";
-import { LivePanel } from "@/components/live-tiles";
+import { LiveOverview } from "@/components/live-tiles";
 import { LockHistory } from "@/components/lock-history";
 import { Notice } from "@/components/notice";
 import { Panel } from "@/components/panel";
@@ -55,7 +55,9 @@ export default function StatusScreen() {
       <QueryView query={overview}>
         {(page) => (
           <>
-            {page.live ? <LivePanel live={page.live} /> : null}
+            {page.live ? (
+              <LiveOverview live={page.live} carName={page.car.name} />
+            ) : null}
             {page.history ? <LockHistory history={page.history} /> : null}
             {page.today ? <TodayPanel today={page.today} /> : null}
             {page.tires ? <Tires tires={page.tires} /> : null}

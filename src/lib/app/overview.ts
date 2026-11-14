@@ -38,6 +38,7 @@ import type {
   OverviewPage,
   PeriodId,
 } from "./contract";
+import { liveDrivingLayout } from "./live-driving";
 import { periodLabel } from "./panels";
 import { placesSummary } from "./places";
 import { appStat, appValue, statsWithValue } from "./values";
@@ -389,6 +390,10 @@ export function overviewPage(
           empty: liveCard.hasValues
             ? null
             : `No live values yet. TeslaMate sends them when ${car.name} is online.`,
+          driving:
+            liveNow && liveCard.hasValues
+              ? liveDrivingLayout(liveNow, f, snapshot, input.showMaps)
+              : null,
         }
       : null,
     history:

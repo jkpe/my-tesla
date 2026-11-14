@@ -648,6 +648,37 @@ describe("overviewPage", () => {
     expect(menuSubtitle(empty, "status")).toBeNull();
   });
 
+  test("adds the driving layout while the car is driving", () => {
+    const view = liveView({
+      state: "driving",
+      shift_state: "D",
+      speed: "72",
+      power: "18",
+      locked: "true",
+      active_route: JSON.stringify({
+        destination: "Home",
+        miles_to_arrival: 6.2137,
+        minutes_to_arrival: 23.4,
+        energy_at_arrival: 73,
+        traffic_minutes_delay: 0,
+        location: { latitude: 33.5, longitude: -111.6 },
+      }),
+    });
+    const page = overviewPage(
+      { ...input, live: { connected: true, hasValues: true, view } },
+      f,
+      now,
+    );
+    expect(page.activity.label).toBe("Driving");
+    expect(page.live?.driving?.speed.value.text).toBe("72 km/h");
+    expect(page.live?.driving?.destination?.title).toBe("Home");
+    expect(page.live?.driving?.map).toEqual({
+      latitude: 33.5,
+      longitude: -111.6,
+    });
+    expect(page.live?.driving?.tiles.map((tile) => tile.key)).toEqual(["lock"]);
+  });
+
   test("explains a car without records", () => {
     const page = overviewPage(
       {

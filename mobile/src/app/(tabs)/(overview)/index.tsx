@@ -5,6 +5,7 @@ import { useLiveChanges } from "@/api/live";
 import { useOverview, type InsightKind } from "@/api/queries";
 import { useCar } from "@/car/car-provider";
 import { CarStage } from "@/components/car-stage";
+import { LiveDriving } from "@/components/live-driving";
 import { CarTitle } from "@/components/car-title";
 import { icons, type IconName } from "@/components/icons";
 import { MenuRow } from "@/components/menu-row";
@@ -117,10 +118,16 @@ function Stage({ page }: { page: OverviewPage }) {
   );
 }
 
+function LiveBlock({ page }: { page: OverviewPage }) {
+  if (!page.live?.driving) return null;
+  return <LiveDriving live={page.live} carName={page.car.name} />;
+}
+
 function PhoneOverview({ page }: { page: OverviewPage }) {
   return (
     <>
       <CarTitle page={page} />
+      <LiveBlock page={page} />
       <Stage page={page} />
       <Menu page={page} />
     </>
@@ -135,6 +142,7 @@ function WideOverview({ page }: { page: OverviewPage }) {
         <Menu page={page} />
       </View>
       <View style={styles.main}>
+        <LiveBlock page={page} />
         <Stage page={page} />
       </View>
     </View>
