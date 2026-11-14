@@ -9,5 +9,13 @@ export async function GET(
   const context = await appContext(params);
   if (!context) return appNotFound();
   const { car, f, now } = context;
-  return appJson(driveList(await recentTrips(car), car, f, now));
+  return appJson(
+    driveList(
+      await recentTrips(car),
+      car,
+      f,
+      now,
+      context.preferences.chargePrice,
+    ),
+  );
 }

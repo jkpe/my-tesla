@@ -89,6 +89,7 @@ export type DriveRow = {
   segments: { kind: "drive" | "stop" | "charge"; share: number }[];
   distance: string;
   consumption: AppValue;
+  cost: string;
 };
 
 export type DriveList = {

@@ -38,6 +38,7 @@ function chargeRow(charge: Charge, f: Formatter): DriveRow {
     segments: [{ kind: "charge", share: 1 }],
     distance: `+${f.energy(charge.energyAddedKwh)}`,
     consumption: appValue(charge.cost === null ? "—" : f.cost(charge.cost)),
+    cost: f.cost(charge.cost),
   };
 }
 
@@ -46,6 +47,7 @@ export function reportPage(
   car: Car,
   f: Formatter,
   now: Date,
+  pricePerKwh: number | null,
 ): ReportPage {
   const presets = input.presets.map(({ label, from, to }) => ({
     label,
@@ -129,7 +131,7 @@ export function reportPage(
         title: group.label,
         rows: group.items.map((item) =>
           item.kind === "trip"
-            ? tripRow(item.trip, rated, f)
+            ? tripRow(item.trip, rated, f, pricePerKwh)
             : chargeRow(item.charge, f),
         ),
       })),

@@ -1,4 +1,5 @@
 import { assessConsumption, ratedWhPerKm } from "../assessment";
+import { driveCost, driveCostDetail, tripDrivingCost } from "../drive-cost";
 import type { DriveEnergy, DrivePoint } from "../drive-series";
 import type { Formatter } from "../format";
 import { tripMarkers } from "../map-points";
@@ -44,6 +45,7 @@ export function tripRow(
   trip: Trip,
   rated: number | null,
   f: Formatter,
+  pricePerKwh: number | null,
 ): DriveRow {
   const summary = tripSummary(trip);
   return {
@@ -64,6 +66,7 @@ export function tripRow(
         summary.distanceKm,
       ),
     ),
+    cost: f.cost(tripDrivingCost(trip, pricePerKwh)),
   };
 }
 
@@ -72,6 +75,7 @@ export function driveList(
   car: Car,
   f: Formatter,
   now: Date,
+  pricePerKwh: number | null,
 ): DriveList {
   const rated = ratedWhPerKm(car);
   const summaries = trips.map((trip) => ({ trip, summary: tripSummary(trip) }));
@@ -90,7 +94,9 @@ export function driveList(
       .groupByDay(summaries, ({ trip }) => trip.startAt, now)
       .map((group) => ({
         title: group.label,
-        rows: group.items.map(({ trip }) => tripRow(trip, rated, f)),
+        rows: group.items.map(({ trip }) =>
+          tripRow(trip, rated, f, pricePerKwh),
+        ),
       })),
   };
 }
@@ -166,6 +172,7 @@ export function driveDetail(
   f: Formatter,
   now: Date,
   showMaps: boolean,
+  pricePerKwh: number | null,
 ): DriveDetail {
   const { drive, route, series, energy } = found;
   const hasSeries = series.length > 1;
@@ -188,6 +195,9 @@ export function driveDetail(
           f,
           drive.distanceKm,
         ),
+      }),
+      appStat("Cost", f.cost(driveCost(drive, pricePerKwh)), {
+        detail: driveCost(drive, pricePerKwh) === null ? null : driveCostDetail,
       }),
       appStat("Battery", levelsText(drive.startLevel, drive.endLevel), {
         detail: levelsUsedText(drive.startLevel, drive.endLevel),
@@ -228,6 +238,7 @@ export function tripDetail(
   f: Formatter,
   now: Date,
   showMaps: boolean,
+  pricePerKwh: number | null,
 ): TripDetail {
   const summary = tripSummary(trip);
   return {
@@ -281,6 +292,15 @@ export function tripDetail(
             f.distance(leg.distanceKm),
             f.duration(leg.durationMin),
             f.efficiency(leg.consumptionWhPerKm),
+            f.cost(
+              driveCost(
+                {
+                  distanceKm: leg.distanceKm,
+                  efficiencyWhPerKm: leg.consumptionWhPerKm,
+                },
+                pricePerKwh,
+              ),
+            ),
           ]),
           target: { kind: "drive", id: leg.driveId },
         };
