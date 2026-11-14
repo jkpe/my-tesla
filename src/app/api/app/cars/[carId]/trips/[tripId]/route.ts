@@ -18,5 +18,15 @@ export async function GET(
         trip.drives.map((drive) => drive.id),
       )
     : new Map();
-  return appJson(tripDetail(trip, routes, car, f, now, showMaps));
+  return appJson(
+    tripDetail(
+      trip,
+      routes,
+      car,
+      f,
+      now,
+      showMaps,
+      context.preferences.chargePrice,
+    ),
+  );
 }

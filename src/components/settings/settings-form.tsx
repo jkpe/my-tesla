@@ -375,7 +375,7 @@ export function SettingsForm({
             />
             <SettingRow
               label="Price per kWh"
-              hint="The app multiplies the energy from the charger by this price."
+              hint="The app multiplies energy from the charger and from driving by this price."
               control={
                 <PriceInput
                   label="Price per kWh"

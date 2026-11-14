@@ -9,6 +9,7 @@ import { Stat } from "@/components/overview/stat";
 import { PageTransition } from "@/components/page-transition";
 import { Panel } from "@/components/panel";
 import { assessConsumption, ratedWhPerKm } from "@/lib/assessment";
+import { driveCost, driveCostDetail } from "@/lib/drive-cost";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
 import { mapThemeOf } from "@/lib/preferences";
@@ -53,6 +54,7 @@ export default async function DrivePage({
     battery: point.battery,
   }));
   const hasSeries = rows.length > 1;
+  const drivingCost = driveCost(drive, preferences.chargePrice);
 
   return (
     <PageTransition>
@@ -113,6 +115,12 @@ export default async function DrivePage({
           )}
         >
           {f.efficiency(drive.efficiencyWhPerKm)}
+        </Stat>
+        <Stat
+          label="Cost"
+          detail={drivingCost === null ? undefined : driveCostDetail}
+        >
+          {f.cost(drivingCost)}
         </Stat>
         <Stat
           label="Battery"

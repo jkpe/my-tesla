@@ -19,7 +19,7 @@ export function DriveListRow({
   const consumption = row.consumption;
   return (
     <ListRow
-      label={`${row.clock}, ${row.title}, ${row.subtitle}, ${row.distance}, ${consumption.text}`}
+      label={`${row.clock}, ${row.title}, ${row.subtitle}, ${row.distance}, ${consumption.text}, ${row.cost}`}
       onPress={() => router.push(targetHref(row.target, stack))}
       start={<RowTime clock={row.clock} caption={row.duration} />}
       title={row.title}
@@ -40,6 +40,9 @@ export function DriveListRow({
             }
           >
             {consumption.text}
+          </Text>
+          <Text variant="caption" numberOfLines={1}>
+            {row.cost}
           </Text>
         </>
       }
