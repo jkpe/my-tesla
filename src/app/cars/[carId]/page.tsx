@@ -5,7 +5,7 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { DayStrip, DayStripLegend } from "@/components/day-strip";
 import { EmptyState } from "@/components/empty-state";
 import { LocationMap, MapsOff } from "@/components/maps";
-import { BatteryPanel } from "@/components/overview/battery-panel";
+import { ChargeCountdown } from "@/components/charge-countdown";
 import { CarRender } from "@/components/overview/car-render";
 import { LivePanel } from "@/components/overview/live-panel";
 import { LockHistory } from "@/components/overview/lock-history";
@@ -30,7 +30,6 @@ import { cn } from "@/lib/utils";
 import {
   activityLabel,
   batteryCaption,
-  batteryTone,
   carActivity,
   liveActivity,
   ongoingText,
@@ -88,13 +87,28 @@ export default async function OverviewPage({
   const { label, tone } = activityLabel(activity);
   const lastSeen = snapshot.positionAt ?? snapshot.stateSince;
   const charging = snapshot.charging || chargingNow !== null;
-  const battery = batteryTone(snapshot.batteryLevel, charging);
   const hasData =
     snapshot.batteryLevel !== null || snapshot.positionAt !== null;
   const renderUrl = show.render ? carImageUrl(car) : null;
   const odometer = f.distanceValue(snapshot.odometerKm);
   const range = f.distanceValue(snapshot.rangeKm);
   const hasPosition = snapshot.latitude !== null && snapshot.longitude !== null;
+  const batteryCaptionText = batteryCaption({
+    level: snapshot.batteryLevel,
+    usableLevel: snapshot.usableBatteryLevel,
+    charging,
+    limitPercent: chargingNow?.limitPercent,
+  });
+  const batteryDetail =
+    chargingNow?.fullAt !== null && chargingNow?.fullAt !== undefined ? (
+      <ChargeCountdown
+        fullAt={chargingNow.fullAt.getTime()}
+        renderedAt={now.getTime()}
+      />
+    ) : batteryCaptionText !== "Rated range" ? (
+      batteryCaptionText
+    ) : undefined;
+  const contentTop = showLive || history ? "mt-4" : "mt-10 md:mt-14";
 
   return (
     <PageTransition>
@@ -141,31 +155,52 @@ export default async function OverviewPage({
         </EmptyState>
       ) : (
         <>
-          <section className="mt-10 md:mt-14">
-            <BatteryPanel
-              level={snapshot.batteryLevel}
-              usableLevel={snapshot.usableBatteryLevel}
-              range={range === null ? null : Math.round(range)}
-              rangeUnit={f.units.distance}
-              locale={f.locale}
-              animated={preferences.motion !== "reduced"}
-              tone={battery}
-              caption={batteryCaption({
-                level: snapshot.batteryLevel,
-                usableLevel: snapshot.usableBatteryLevel,
-                charging,
-                limitPercent: chargingNow?.limitPercent,
-              })}
-              fullAt={chargingNow?.fullAt?.getTime() ?? null}
-              renderedAt={now.getTime()}
-              levelAssessment={assessBatteryLevel(
-                snapshot.batteryLevel,
-                charging,
-              )}
+          {showLive && (
+            <LivePanel
+              carId={car.id}
+              carName={car.name}
+              feed={live}
+              now={now}
+              f={f}
+              className="mt-10 md:mt-14"
             />
-          </section>
+          )}
 
-          <dl className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+          {history && (
+            <LockHistory
+              events={history}
+              now={now}
+              f={f}
+              className={showLive ? "mt-4" : "mt-10 md:mt-14"}
+            />
+          )}
+
+          <dl
+            className={cn(
+              "grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3 lg:grid-cols-6",
+              contentTop,
+            )}
+          >
+            <Stat
+              label="Battery"
+              detail={batteryDetail}
+              assessment={assessBatteryLevel(snapshot.batteryLevel, charging)}
+            >
+              <AnimatedNumber
+                value={snapshot.batteryLevel}
+                suffix="%"
+                locale={f.locale}
+                animated={preferences.motion !== "reduced"}
+              />
+            </Stat>
+            <Stat label="Range">
+              <AnimatedNumber
+                value={range === null ? null : Math.round(range)}
+                suffix={` ${f.units.distance}`}
+                locale={f.locale}
+                animated={preferences.motion !== "reduced"}
+              />
+            </Stat>
             <Stat label="Odometer">
               <AnimatedNumber
                 value={odometer === null ? null : Math.round(odometer)}
@@ -190,33 +225,55 @@ export default async function OverviewPage({
             <Stat label="Software">{snapshot.softwareVersion ?? "—"}</Stat>
           </dl>
 
-          {showLive && (
-            <LivePanel
-              carId={car.id}
-              carName={car.name}
-              feed={live}
-              now={now}
-              f={f}
-              className="mt-12"
-            />
-          )}
-
-          {history && (
-            <LockHistory
-              events={history}
-              now={now}
-              f={f}
-              className={showLive ? "mt-4" : "mt-12"}
-            />
+          {show.recent && (
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <RecentCard
+                title="Last drive"
+                href={carPath(car, "/drives")}
+                linkLabel="All drives"
+              >
+                {lastDrive ? (
+                  <>
+                    <p className="truncate text-lg font-medium">
+                      {lastDrive.from} → {lastDrive.to}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground tabular">
+                      {f.distance(lastDrive.distanceKm)} ·{" "}
+                      {f.duration(lastDrive.durationMin)} ·{" "}
+                      {f.day(lastDrive.startAt, now)}{" "}
+                      {f.clock(lastDrive.startAt)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-subtle">No record yet.</p>
+                )}
+              </RecentCard>
+              <RecentCard
+                title="Last charge"
+                href={carPath(car, "/charging")}
+                linkLabel="All charges"
+              >
+                {lastCharge ? (
+                  <>
+                    <p className="truncate text-lg font-medium">
+                      {lastCharge.place}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground tabular">
+                      {lastCharge.endAt
+                        ? `+${f.energy(lastCharge.energyAddedKwh)} · ${lastCharge.startLevel ?? "—"}% → ${lastCharge.endLevel ?? "—"}%`
+                        : `${ongoingText} since ${f.clock(lastCharge.startAt)}`}{" "}
+                      · {f.day(lastCharge.startAt, now)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-subtle">No record yet.</p>
+                )}
+              </RecentCard>
+            </div>
           )}
 
           {show.today && (
-            <section
-              className={cn(
-                "rounded-xl bg-card p-5",
-                showLive ? "mt-4" : "mt-12",
-              )}
-            >
+            <section className="mt-4 rounded-xl bg-card p-5">
               <header className="flex items-center justify-between gap-4">
                 <h2 className="text-sm text-muted-foreground">Today</h2>
                 <Link
@@ -247,8 +304,7 @@ export default async function OverviewPage({
           {(show.tires || show.location) && (
             <div
               className={cn(
-                "grid grid-cols-1 gap-4",
-                show.today || showLive ? "mt-4" : "mt-12",
+                "mt-4 grid grid-cols-1 gap-4",
                 show.tires && show.location && "md:grid-cols-2",
               )}
             >
@@ -312,53 +368,6 @@ export default async function OverviewPage({
                   )}
                 </section>
               )}
-            </div>
-          )}
-
-          {show.recent && (
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <RecentCard
-                title="Last drive"
-                href={carPath(car, "/drives")}
-                linkLabel="All drives"
-              >
-                {lastDrive ? (
-                  <>
-                    <p className="truncate text-lg font-medium">
-                      {lastDrive.from} → {lastDrive.to}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground tabular">
-                      {f.distance(lastDrive.distanceKm)} ·{" "}
-                      {f.duration(lastDrive.durationMin)} ·{" "}
-                      {f.day(lastDrive.startAt, now)}{" "}
-                      {f.clock(lastDrive.startAt)}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-sm text-subtle">No record yet.</p>
-                )}
-              </RecentCard>
-              <RecentCard
-                title="Last charge"
-                href={carPath(car, "/charging")}
-                linkLabel="All charges"
-              >
-                {lastCharge ? (
-                  <>
-                    <p className="truncate text-lg font-medium">
-                      {lastCharge.place}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground tabular">
-                      {lastCharge.endAt
-                        ? `+${f.energy(lastCharge.energyAddedKwh)} · ${lastCharge.startLevel ?? "—"}% → ${lastCharge.endLevel ?? "—"}%`
-                        : `${ongoingText} since ${f.clock(lastCharge.startAt)}`}{" "}
-                      · {f.day(lastCharge.startAt, now)}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-sm text-subtle">No record yet.</p>
-                )}
-              </RecentCard>
             </div>
           )}
         </>
