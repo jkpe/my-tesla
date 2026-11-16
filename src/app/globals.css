@@ -245,72 +245,39 @@
     visibility 0s linear var(--duration);
 }
 
-@supports (animation-timeline: scroll()) {
-  @media (prefers-reduced-motion: no-preference) {
-    :root:not([data-motion="reduced"]) .overview-hero {
-      --hero-top: 2rem;
-      --hero-text: 6.5rem;
-      --car-gap: -0.5rem;
-      --car-width: min(100%, 48rem);
-      --dock-width: 8.75rem;
-      --collapse: calc(min(100cqw, 48rem) * 7 / 16 + var(--car-gap));
-      container-type: inline-size;
+.overview-hero {
+  --dock-width: 8.75rem;
 
-      @media (width >= 40rem) {
-        --dock-width: 12.5rem;
-      }
+  @media (width >= 40rem) {
+    --dock-width: 12.5rem;
+  }
 
-      @media (width >= 48rem) {
-        --hero-top: 3.5rem;
-        --car-gap: -1.5rem;
-        --dock-width: 18rem;
-      }
-
-      .hero-head {
-        position: sticky;
-        top: 3.5rem;
-        z-index: 10;
-      }
-
-      .hero-text {
-        max-width: calc(100% - var(--dock-width) - 1rem);
-      }
-
-      .hero-car {
-        position: absolute;
-        top: calc(100% + var(--car-gap));
-        left: calc(50% - var(--car-width) / 2);
-        width: var(--car-width);
-        max-width: none;
-        margin: 0;
-        pointer-events: none;
-        animation: hero-dock linear both;
-        animation-timeline: scroll(root block);
-        animation-range: 0px var(--collapse);
-      }
-
-      .hero-spacer {
-        display: block;
-        width: min(100%, 48rem);
-        aspect-ratio: 16 / 7;
-        margin-top: var(--car-gap);
-      }
-
-      &:has(.hero-car:empty) .hero-spacer {
-        display: none;
-      }
-    }
+  @media (width >= 48rem) {
+    --dock-width: 18rem;
   }
 }
 
-@keyframes hero-dock {
-  to {
-    top: calc(
-      var(--hero-top) + var(--hero-text) / 2 - var(--dock-width) * 7 / 32
-    );
-    left: calc(100% - var(--dock-width));
-    width: var(--dock-width);
-  }
+.overview-hero .hero-head:has(.hero-car) {
+  position: sticky;
+  top: 3.5rem;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--dock-width);
+  column-gap: 1rem;
+  align-items: center;
+}
+
+.overview-hero .hero-head:not(:has(.hero-car)) {
+  position: sticky;
+  top: 3.5rem;
+  z-index: 10;
+}
+
+.overview-hero .hero-car {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  pointer-events: none;
 }
 
 ::view-transition {
