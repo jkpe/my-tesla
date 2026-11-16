@@ -83,6 +83,7 @@ export function LivePanel({
   f,
   now,
   className,
+  variant = "card",
 }: {
   carId: number;
   carName: string;
@@ -90,12 +91,20 @@ export function LivePanel({
   f: Formatter;
   now: Date;
   className?: string;
+  variant?: "card" | "rail";
 }) {
-  const tiles = liveTiles(feed.view, f);
+  const tiles = liveTiles(feed.view, f).filter((tile) => tile.key !== "lock");
   const alerts = liveNotices(feed);
+  const rail = variant === "rail";
 
   return (
-    <section className={cn("rounded-xl bg-card p-5", className)}>
+    <section
+      className={cn(
+        !rail && "rounded-xl bg-card p-5",
+        rail && "min-w-0",
+        className,
+      )}
+    >
       <LiveStream carId={carId} />
       <header className="flex items-center justify-between gap-4">
         <h2 className="text-sm text-muted-foreground">Live</h2>
@@ -110,7 +119,14 @@ export function LivePanel({
         </p>
       </header>
       {feed.hasValues && tiles.length > 0 ? (
-        <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+          className={cn(
+            "mt-4",
+            rail
+              ? "flex flex-col gap-y-5"
+              : "grid grid-cols-1 gap-y-5 sm:grid-cols-2",
+          )}
+        >
           {tiles.map((tile) => (
             <Tile tile={tile} now={now} key={tile.key} />
           ))}
@@ -121,7 +137,13 @@ export function LivePanel({
         </p>
       )}
       {alerts.length > 0 && (
-        <ul className="mt-5 space-y-2 border-t border-border pt-4">
+        <ul
+          className={cn(
+            "mt-5 space-y-2",
+            !rail && "border-t border-border pt-4",
+            rail && "border-t border-border/60 pt-4",
+          )}
+        >
           {alerts.map((alert) => (
             <li key={alert} className="flex items-start gap-2 text-sm">
               <CircleAlert
