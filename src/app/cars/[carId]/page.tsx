@@ -108,8 +108,6 @@ export default async function OverviewPage({
     ) : batteryCaptionText !== "Rated range" ? (
       batteryCaptionText
     ) : undefined;
-  const contentTop = showLive || history ? "mt-4" : "mt-10 md:mt-14";
-
   return (
     <PageTransition>
       <div className="overview-hero">
@@ -155,220 +153,237 @@ export default async function OverviewPage({
         </EmptyState>
       ) : (
         <>
-          {showLive && (
-            <LivePanel
-              carId={car.id}
-              carName={car.name}
-              feed={live}
-              now={now}
-              f={f}
-              className="mt-10 md:mt-14"
-            />
-          )}
-
-          {history && (
-            <LockHistory
-              events={history}
-              now={now}
-              f={f}
-              className={showLive ? "mt-4" : "mt-10 md:mt-14"}
-            />
-          )}
-
-          <dl
+          <div
             className={cn(
-              "grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3 lg:grid-cols-6",
-              contentTop,
+              "mt-10 space-y-4 md:mt-14",
+              showLive &&
+                "md:grid md:grid-cols-[minmax(0,1fr)_16rem] md:items-start md:gap-x-10 md:space-y-0",
             )}
           >
-            <Stat
-              label="Battery"
-              detail={batteryDetail}
-              assessment={assessBatteryLevel(snapshot.batteryLevel, charging)}
-            >
-              <AnimatedNumber
-                value={snapshot.batteryLevel}
-                suffix="%"
-                locale={f.locale}
-                animated={preferences.motion !== "reduced"}
-              />
-            </Stat>
-            <Stat label="Range">
-              <AnimatedNumber
-                value={range === null ? null : Math.round(range)}
-                suffix={` ${f.units.distance}`}
-                locale={f.locale}
-                animated={preferences.motion !== "reduced"}
-              />
-            </Stat>
-            <Stat label="Odometer">
-              <AnimatedNumber
-                value={odometer === null ? null : Math.round(odometer)}
-                suffix={` ${f.units.distance}`}
-                locale={f.locale}
-                animated={preferences.motion !== "reduced"}
-              />
-            </Stat>
-            <Stat label="Outside">{f.temperature(snapshot.outsideTemp)}</Stat>
-            <Stat
-              label="Cabin"
-              detail={
-                snapshot.climateOn === null
-                  ? undefined
-                  : snapshot.climateOn
-                    ? "Climate on"
-                    : "Climate off"
-              }
-            >
-              {f.temperature(snapshot.insideTemp)}
-            </Stat>
-            <Stat label="Software">{snapshot.softwareVersion ?? "—"}</Stat>
-          </dl>
-
-          {show.recent && (
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <RecentCard
-                title="Last drive"
-                href={carPath(car, "/drives")}
-                linkLabel="All drives"
-              >
-                {lastDrive ? (
-                  <>
-                    <p className="truncate text-lg font-medium">
-                      {lastDrive.from} → {lastDrive.to}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground tabular">
-                      {f.distance(lastDrive.distanceKm)} ·{" "}
-                      {f.duration(lastDrive.durationMin)} ·{" "}
-                      {f.day(lastDrive.startAt, now)}{" "}
-                      {f.clock(lastDrive.startAt)}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-sm text-subtle">No record yet.</p>
-                )}
-              </RecentCard>
-              <RecentCard
-                title="Last charge"
-                href={carPath(car, "/charging")}
-                linkLabel="All charges"
-              >
-                {lastCharge ? (
-                  <>
-                    <p className="truncate text-lg font-medium">
-                      {lastCharge.place}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground tabular">
-                      {lastCharge.endAt
-                        ? `+${f.energy(lastCharge.energyAddedKwh)} · ${lastCharge.startLevel ?? "—"}% → ${lastCharge.endLevel ?? "—"}%`
-                        : `${ongoingText} since ${f.clock(lastCharge.startAt)}`}{" "}
-                      · {f.day(lastCharge.startAt, now)}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-sm text-subtle">No record yet.</p>
-                )}
-              </RecentCard>
-            </div>
-          )}
-
-          {show.today && (
-            <section className="mt-4 rounded-xl bg-card p-5">
-              <header className="flex items-center justify-between gap-4">
-                <h2 className="text-sm text-muted-foreground">Today</h2>
-                <Link
-                  href={carPath(car, "/timeline")}
-                  transitionTypes={["tab-forward"]}
-                  className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-tesla hover:text-foreground"
+            <div className="min-w-0 space-y-4">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3 lg:grid-cols-6">
+                <Stat
+                  label="Battery"
+                  detail={batteryDetail}
+                  assessment={assessBatteryLevel(
+                    snapshot.batteryLevel,
+                    charging,
+                  )}
                 >
-                  Timeline
-                  <ChevronRight className="size-4" />
-                </Link>
-              </header>
-              <div className="mt-4">
-                <DayStrip
-                  segments={todaySegments}
-                  start={today.start}
-                  end={today.end}
-                  now={now}
-                  size="sm"
-                  hourLabels={[0, 6, 12, 18, 24].map((hour) => f.hour(hour))}
-                />
-              </div>
-              <div className="mt-4">
-                <DayStripLegend entries={dayLegend(today, now)} />
-              </div>
-            </section>
-          )}
+                  <AnimatedNumber
+                    value={snapshot.batteryLevel}
+                    suffix="%"
+                    locale={f.locale}
+                    animated={preferences.motion !== "reduced"}
+                  />
+                </Stat>
+                <Stat label="Range">
+                  <AnimatedNumber
+                    value={range === null ? null : Math.round(range)}
+                    suffix={` ${f.units.distance}`}
+                    locale={f.locale}
+                    animated={preferences.motion !== "reduced"}
+                  />
+                </Stat>
+                <Stat label="Odometer">
+                  <AnimatedNumber
+                    value={odometer === null ? null : Math.round(odometer)}
+                    suffix={` ${f.units.distance}`}
+                    locale={f.locale}
+                    animated={preferences.motion !== "reduced"}
+                  />
+                </Stat>
+                <Stat
+                  label="Outside"
+                  detail={
+                    snapshot.climateOn === null
+                      ? undefined
+                      : snapshot.climateOn
+                        ? "Climate on"
+                        : "Climate off"
+                  }
+                >
+                  {f.temperature(snapshot.outsideTemp)}
+                </Stat>
+                <Stat label="Cabin">{f.temperature(snapshot.insideTemp)}</Stat>
+                <Stat label="Software">{snapshot.softwareVersion ?? "—"}</Stat>
+              </dl>
 
-          {(show.tires || show.location) && (
-            <div
-              className={cn(
-                "mt-4 grid grid-cols-1 gap-4",
-                show.tires && show.location && "md:grid-cols-2",
+              {show.recent && (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <RecentCard
+                    title="Last drive"
+                    href={carPath(car, "/drives")}
+                    linkLabel="All drives"
+                  >
+                    {lastDrive ? (
+                      <>
+                        <p className="truncate text-lg font-medium">
+                          {lastDrive.from} → {lastDrive.to}
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground tabular">
+                          {f.distance(lastDrive.distanceKm)} ·{" "}
+                          {f.duration(lastDrive.durationMin)} ·{" "}
+                          {f.day(lastDrive.startAt, now)}{" "}
+                          {f.clock(lastDrive.startAt)}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-subtle">No record yet.</p>
+                    )}
+                  </RecentCard>
+                  <RecentCard
+                    title="Last charge"
+                    href={carPath(car, "/charging")}
+                    linkLabel="All charges"
+                  >
+                    {lastCharge ? (
+                      <>
+                        <p className="truncate text-lg font-medium">
+                          {lastCharge.place}
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground tabular">
+                          {lastCharge.endAt
+                            ? `+${f.energy(lastCharge.energyAddedKwh)} · ${lastCharge.startLevel ?? "—"}% → ${lastCharge.endLevel ?? "—"}%`
+                            : `${ongoingText} since ${f.clock(lastCharge.startAt)}`}{" "}
+                          · {f.day(lastCharge.startAt, now)}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-subtle">No record yet.</p>
+                    )}
+                  </RecentCard>
+                </div>
               )}
-            >
-              {show.tires && (
-                <TireCard
-                  tires={liveNow?.tires ?? snapshot.tires}
-                  format={(bar) => f.pressure(bar)}
-                  assess={(tire, bar) => assessTire(tire, bar, leaks, f)}
-                  warnings={leaks.map((leak) =>
-                    leakWarning(leak, (bar) => f.pressure(bar)),
-                  )}
+
+              {showLive && (
+                <LivePanel
+                  carId={car.id}
+                  carName={car.name}
+                  feed={live}
+                  now={now}
+                  f={f}
+                  className="md:hidden"
                 />
               )}
-              {show.location && (
-                <section className="flex flex-col overflow-hidden rounded-xl bg-card">
-                  {hasPosition && (
-                    <div className={show.tires ? "h-48" : "h-64"}>
-                      {showMaps ? (
-                        <LocationMap
-                          latitude={snapshot.latitude ?? 0}
-                          longitude={snapshot.longitude ?? 0}
-                          theme={mapTheme}
-                        />
-                      ) : (
-                        <MapsOff />
+
+              {show.today && (
+                <section className="rounded-xl bg-card p-5">
+                  <header className="flex items-center justify-between gap-4">
+                    <h2 className="text-sm text-muted-foreground">Today</h2>
+                    <Link
+                      href={carPath(car, "/timeline")}
+                      transitionTypes={["tab-forward"]}
+                      className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-tesla hover:text-foreground"
+                    >
+                      Timeline
+                      <ChevronRight className="size-4" />
+                    </Link>
+                  </header>
+                  <div className="mt-4">
+                    <DayStrip
+                      segments={todaySegments}
+                      start={today.start}
+                      end={today.end}
+                      now={now}
+                      size="sm"
+                      hourLabels={[0, 6, 12, 18, 24].map((hour) =>
+                        f.hour(hour),
                       )}
-                    </div>
-                  )}
-                  {hasPosition ? (
-                    <div className="flex items-end justify-between gap-4 p-5">
-                      <div className="min-w-0">
-                        <h2 className="text-sm text-muted-foreground">
-                          Location
-                        </h2>
-                        <p className="mt-1 truncate text-sm text-subtle tabular">
-                          {lastSeen
-                            ? `Last seen ${f.dayInline(lastSeen, now)} at ${f.clock(lastSeen)}`
-                            : "Never seen"}
-                        </p>
-                      </div>
-                      {showMaps && (
-                        <a
-                          href={`https://maps.apple.com/?ll=${snapshot.latitude},${snapshot.longitude}&q=${encodeURIComponent(car.name)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex h-10 shrink-0 items-center justify-center rounded bg-background px-5 text-sm font-medium text-secondary-foreground transition-tesla hover:bg-accent"
-                        >
-                          Open in Maps
-                        </a>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="p-5">
-                      <h2 className="text-sm text-muted-foreground">
-                        Location
-                      </h2>
-                      <p className="mt-3 text-sm text-subtle">
-                        No position yet.
-                      </p>
-                    </div>
-                  )}
+                    />
+                  </div>
+                  <div className="mt-4">
+                    <DayStripLegend entries={dayLegend(today, now)} />
+                  </div>
                 </section>
               )}
+
+              {(show.tires || show.location) && (
+                <div
+                  className={cn(
+                    "grid grid-cols-1 gap-4",
+                    show.tires && show.location && "md:grid-cols-2",
+                  )}
+                >
+                  {show.tires && (
+                    <TireCard
+                      tires={liveNow?.tires ?? snapshot.tires}
+                      format={(bar) => f.pressure(bar)}
+                      assess={(tire, bar) => assessTire(tire, bar, leaks, f)}
+                      warnings={leaks.map((leak) =>
+                        leakWarning(leak, (bar) => f.pressure(bar)),
+                      )}
+                    />
+                  )}
+                  {show.location && (
+                    <section className="flex flex-col overflow-hidden rounded-xl bg-card">
+                      {hasPosition && (
+                        <div className={show.tires ? "h-48" : "h-64"}>
+                          {showMaps ? (
+                            <LocationMap
+                              latitude={snapshot.latitude ?? 0}
+                              longitude={snapshot.longitude ?? 0}
+                              theme={mapTheme}
+                            />
+                          ) : (
+                            <MapsOff />
+                          )}
+                        </div>
+                      )}
+                      {hasPosition ? (
+                        <div className="flex items-end justify-between gap-4 p-5">
+                          <div className="min-w-0">
+                            <h2 className="text-sm text-muted-foreground">
+                              Location
+                            </h2>
+                            <p className="mt-1 truncate text-sm text-subtle tabular">
+                              {lastSeen
+                                ? `Last seen ${f.dayInline(lastSeen, now)} at ${f.clock(lastSeen)}`
+                                : "Never seen"}
+                            </p>
+                          </div>
+                          {showMaps && (
+                            <a
+                              href={`https://maps.apple.com/?ll=${snapshot.latitude},${snapshot.longitude}&q=${encodeURIComponent(car.name)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex h-10 shrink-0 items-center justify-center rounded bg-background px-5 text-sm font-medium text-secondary-foreground transition-tesla hover:bg-accent"
+                            >
+                              Open in Maps
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="p-5">
+                          <h2 className="text-sm text-muted-foreground">
+                            Location
+                          </h2>
+                          <p className="mt-3 text-sm text-subtle">
+                            No position yet.
+                          </p>
+                        </div>
+                      )}
+                    </section>
+                  )}
+                </div>
+              )}
             </div>
+
+            {showLive && (
+              <LivePanel
+                carId={car.id}
+                carName={car.name}
+                feed={live}
+                now={now}
+                f={f}
+                variant="rail"
+                className="sticky top-20 hidden md:block"
+              />
+            )}
+          </div>
+
+          {history && (
+            <LockHistory events={history} now={now} f={f} className="mt-4" />
           )}
         </>
       )}
