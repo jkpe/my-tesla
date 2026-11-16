@@ -62,13 +62,13 @@ Checked on 2026-10-01 against the demo database, on desktop, phone, dark, and li
 5. **Phone width.** Every page grid uses `grid-cols-1`, which is `minmax(0, 1fr)`. Without it, a Recharts wrapper keeps its first width and pushes the page 11 px wider than the phone.
 6. **Advice colors only with a reference.** The level bands use one color. An LFP battery and an NMC battery need different charge limits, and the app does not know which one the car has. Since [decision 0013](../docs/decisions/0013-value-colors.md), values with a known reference get a green, default, or red tone and a tooltip.
 
-## Overview car on scroll
+## Overview car render
 
-Checked on 2026-10-01 at 1440 x 900 and 390 x 844, in dark and light.
+Checked on 2026-11-16 at 1440 x 900 and 390 x 844, in dark and light. Updated from the scroll-dock pattern checked on 2026-10-01.
 
-1. The name block sticks below the header while the car area collapses. The collapse distance equals the car area height, so the battery row meets the name block just when the block starts to scroll away.
-2. A CSS scroll-driven animation on `scroll(root)` moves the car from its large centered place to the right of the name block, centered on that row. The range uses `100cqw` from the hero container, so it matches the car area at every width.
-3. Browsers without `animation-timeline`, reduced motion in the system, and the Reduced setting all keep the static layout.
+1. When the overview car image is on, the hero uses a two-column grid: the name block on the left and the render at the dock width on the right, vertically centered on the name block.
+2. The dock width steps from 8.75 rem to 12.5 rem at 40 rem and 18 rem at 48 rem, matching the old docked size.
+3. The name block sticks below the site header while the rest of the page scrolls. There is no scroll-driven resize and no spacer under the hero.
 4. The glow under the car is a radial gradient. A blur filter showed a clipped rectangle at the small size.
 
 ## Settings
