@@ -135,7 +135,7 @@ export default async function OverviewPage({
             </p>
           </div>
           {renderUrl && (
-            <div className="hero-car mx-auto -mt-2 w-full max-w-3xl md:-mt-6">
+            <div className="hero-car">
               <CarRender
                 src={renderUrl}
                 alt={`${car.name}, ${variantLine(car)}`}
@@ -143,7 +143,6 @@ export default async function OverviewPage({
             </div>
           )}
         </section>
-        {renderUrl && <div aria-hidden className="hero-spacer hidden" />}
       </div>
 
       {!hasData ? (
