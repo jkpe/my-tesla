@@ -61,6 +61,7 @@ export function LiveDriving({
         <>
           {driving.map ? (
             <LocationMap
+              size="card"
               latitude={driving.map.latitude}
               longitude={driving.map.longitude}
               label={`Map of where ${carName} is`}

@@ -111,10 +111,10 @@ describe("driveList", () => {
   });
 
   test("gives each row and each day a label with full units", () => {
-    const [section] = driveList(trips, car, f, now).sections;
+    const [section] = driveList(trips, car, f, now, 0.15).sections;
     expect(section?.label).toBe("Today, 2 trips, 360 kilometers");
     expect(section?.rows[1]?.label).toBe(
-      "09:00, 4 hours 30 minutes, Ankara, from Istanbul, 1 stop, 1 with a charge, 240 kilometers, 150 watt-hours per kilometer",
+      "09:00, 4 hours 30 minutes, Ankara, from Istanbul, 1 stop, 1 with a charge, 240 kilometers, 150 watt-hours per kilometer, 5.40",
     );
   });
 
@@ -209,13 +209,14 @@ describe("driveDetail", () => {
       f,
       now,
       true,
+      null,
     );
     expect(detail.stats.map((stat) => stat.label)).not.toContain("Peak power");
   });
 
   test("shows a small recovered energy in watt-hours", () => {
     const recovered = (energy: { usedKwh: number; recoveredKwh: number }) =>
-      driveDetail({ ...found, energy }, car, f, now, true).stats.find(
+      driveDetail({ ...found, energy }, car, f, now, true, null).stats.find(
         (stat) => stat.label === "Energy recovered",
       );
     expect(recovered({ usedKwh: 2.53, recoveredKwh: 0.045 })).toMatchObject({
@@ -256,9 +257,9 @@ describe("tripDetail", () => {
     ]);
     expect(detail.routes).toHaveLength(2);
     expect(detail.steps.map((step) => step.label)).toEqual([
-      "09:00, Istanbul to Bolu, 120 kilometers, 2 hours, 150 watt-hours per kilometer",
+      "09:00, Istanbul to Bolu, 120 kilometers, 2 hours, 150 watt-hours per kilometer, 3.60",
       "11:00, Supercharger Bolu, Charging stop, 40 minutes, +30.0 kilowatt-hours, 30% to 75%, 312.00",
-      "11:40, Bolu to Ankara, 120 kilometers, 1 hour 50 minutes, 150 watt-hours per kilometer",
+      "11:40, Bolu to Ankara, 120 kilometers, 1 hour 50 minutes, 150 watt-hours per kilometer, 3.60",
     ]);
     expect(detail.markers?.map((marker) => marker.kind)).toEqual([
       "start",
@@ -273,7 +274,7 @@ describe("tripDetail", () => {
 
   test("shows the charging cost only for a trip with a charge", () => {
     const labels = (trip: (typeof trips)[number]) =>
-      tripDetail(trip, new Map(), car, f, now, true).stats.map(
+      tripDetail(trip, new Map(), car, f, now, true, null).stats.map(
         (stat) => stat.label,
       );
     expect(labels(trips[1]!)).toContain("Charging cost");

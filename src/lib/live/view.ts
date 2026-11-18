@@ -9,7 +9,7 @@ type LiveTires = {
   rearRight: number;
 };
 
-export type LiveRoute = {
+type LiveRoute = {
   destination: string;
   distanceKm: number | null;
   minutesToArrival: number | null;
