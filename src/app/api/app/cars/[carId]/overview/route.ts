@@ -63,6 +63,7 @@ export async function GET(
         driven,
         visited,
         period: preferences.period,
+        pricePerKwh: preferences.chargePrice,
       },
       f,
       now,

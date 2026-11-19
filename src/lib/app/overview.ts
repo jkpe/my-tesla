@@ -40,6 +40,7 @@ import type {
 } from "./contract";
 import { liveDrivingLayout } from "./live-driving";
 import { periodLabel } from "./panels";
+import { lastChargeLine, lastDriveLine } from "./overview-recent";
 import { placesSummary } from "./places";
 import { appStat, appValue, statsWithValue } from "./values";
 
@@ -60,6 +61,7 @@ export type OverviewInput = {
   driven: DriveTotals;
   visited: VisitedPlace[];
   period: PeriodId;
+  pricePerKwh: number | null;
 };
 
 const batteryCalloutTones = {
@@ -96,23 +98,6 @@ export function dayStrip(
     hours: [0, 6, 12, 18, 24].map((hour) => f.hour(hour)),
     legend: dayLegend(today, now),
   };
-}
-
-function lastDriveLine(drive: Drive | null, f: Formatter, now: Date): string {
-  if (!drive) return "No drive yet";
-  return `${drive.from} → ${drive.to} · ${f.distance(drive.distanceKm)} · ${f.duration(drive.durationMin)} · ${f.day(drive.startAt, now)} ${f.clock(drive.startAt)}`;
-}
-
-function lastChargeLine(
-  charge: Charge | null,
-  f: Formatter,
-  now: Date,
-): string {
-  if (!charge) return "No charge yet";
-  const done = charge.endAt
-    ? `+${f.energy(charge.energyAddedKwh)} · ${charge.startLevel ?? "—"}% → ${charge.endLevel ?? "—"}%`
-    : `${ongoingText} since ${f.clock(charge.startAt)}`;
-  return `${charge.place} · ${done} · ${f.day(charge.startAt, now)}`;
 }
 
 function parkedAt(
@@ -276,7 +261,9 @@ export function overviewPage(
     {
       key: "drives",
       title: "Drives",
-      subtitle: show.recent ? lastDriveLine(input.lastDrive, f, now) : null,
+      subtitle: show.recent
+        ? lastDriveLine(input.lastDrive, f, now, input.pricePerKwh)
+        : null,
     },
     {
       key: "charging",

@@ -32,9 +32,12 @@ import {
   batteryCaption,
   carActivity,
   liveActivity,
-  ongoingText,
   variantLine,
 } from "@/lib/vehicle";
+import {
+  lastChargeCardDetail,
+  lastDriveCardDetail,
+} from "@/lib/app/overview-recent";
 import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
@@ -221,10 +224,12 @@ export default async function OverviewPage({
                           {lastDrive.from} → {lastDrive.to}
                         </p>
                         <p className="mt-1 text-sm text-muted-foreground tabular">
-                          {f.distance(lastDrive.distanceKm)} ·{" "}
-                          {f.duration(lastDrive.durationMin)} ·{" "}
-                          {f.day(lastDrive.startAt, now)}{" "}
-                          {f.clock(lastDrive.startAt)}
+                          {lastDriveCardDetail(
+                            lastDrive,
+                            f,
+                            now,
+                            preferences.chargePrice,
+                          )}
                         </p>
                       </>
                     ) : (
@@ -242,10 +247,7 @@ export default async function OverviewPage({
                           {lastCharge.place}
                         </p>
                         <p className="mt-1 text-sm text-muted-foreground tabular">
-                          {lastCharge.endAt
-                            ? `+${f.energy(lastCharge.energyAddedKwh)} · ${lastCharge.startLevel ?? "—"}% → ${lastCharge.endLevel ?? "—"}%`
-                            : `${ongoingText} since ${f.clock(lastCharge.startAt)}`}{" "}
-                          · {f.day(lastCharge.startAt, now)}
+                          {lastChargeCardDetail(lastCharge, f, now)}
                         </p>
                       </>
                     ) : (

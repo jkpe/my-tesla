@@ -72,6 +72,7 @@ const input: OverviewInput = {
   },
   visited: [],
   period: "30d",
+  pricePerKwh: null,
 };
 
 const lastDrive: Drive = {
@@ -512,6 +513,17 @@ describe("overviewPage", () => {
     expect(menuSubtitle(shown, "charging")).toStartWith(
       "Home · +24.6 kWh · 30% → 66% · ",
     );
+    const priced = overviewPage({ ...records, pricePerKwh: 0.2 }, f, now);
+    expect(menuSubtitle(priced, "drives")).toContain(" · 0.55 · ");
+    const charged = overviewPage(
+      {
+        ...records,
+        lastCharge: { ...lastCharge, cost: 12.5 },
+      },
+      f,
+      now,
+    );
+    expect(menuSubtitle(charged, "charging")).toContain(" · 12.50 · ");
     const hidden = overviewPage(
       {
         ...records,
