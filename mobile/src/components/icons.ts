@@ -25,6 +25,7 @@ export const icons = {
   settings: { ios: "gearshape.fill", android: "settings" },
   timeline: { ios: "clock.fill", android: "schedule" },
   report: { ios: "doc.text.fill", android: "description" },
+  costs: { ios: "dollarsign.circle.fill", android: "payments" },
   maps: { ios: "map.fill", android: "map" },
   year: { ios: "calendar", android: "calendar_month" },
 } as const satisfies Record<string, IconName>;

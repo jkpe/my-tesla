@@ -284,6 +284,17 @@ export type ReportPage = {
   exports: AppExport[];
 };
 
+export type CostsPage = {
+  title: string;
+  subtitle: string | null;
+  period: PeriodId;
+  periods: { id: PeriodId; label: string }[];
+  hero: AppStat[];
+  heroBlocks: AppBlock[];
+  notices: string[];
+  sections: AppSection[];
+};
+
 export type YearPage = {
   title: string;
   subtitle: string | null;

@@ -121,6 +121,7 @@ export const tabKeys = [
   { id: "charging", label: "Charging" },
   { id: "battery", label: "Battery" },
   { id: "stats", label: "Stats" },
+  { id: "costs", label: "Costs" },
   { id: "places", label: "Places" },
 ] as const;
 
@@ -198,6 +199,7 @@ export const defaultPreferences: Preferences = {
     charging: true,
     battery: true,
     stats: true,
+    costs: true,
     places: true,
   },
   overview: {

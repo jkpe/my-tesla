@@ -15,6 +15,7 @@ import {
   carList,
   chargeDetail,
   chargeList,
+  costsPage,
   driveDetail,
   driveList,
   insightPage,
@@ -212,6 +213,15 @@ export function useInsight(
     key: ["insight", carId, kind, period],
     path: `/api/app/cars/${carId}/${kind}${period ? `?period=${period}` : ""}`,
     read: insightPage,
+    keepPrevious: true,
+  });
+}
+
+export function useCosts(carId: number, period: PeriodId | null) {
+  return useAppQuery({
+    key: ["costs", carId, period],
+    path: `/api/app/cars/${carId}/costs${period ? `?period=${period}` : ""}`,
+    read: costsPage,
     keepPrevious: true,
   });
 }

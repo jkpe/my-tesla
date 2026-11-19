@@ -13,6 +13,7 @@ export const tabs = [
   { id: "charging", label: "Charging", segment: "/charging" },
   { id: "battery", label: "Battery", segment: "/battery" },
   { id: "stats", label: "Stats", segment: "/stats" },
+  { id: "costs", label: "Costs", segment: "/costs" },
   { id: "places", label: "Places", segment: "/places" },
   { id: "settings", label: "Settings", segment: "/settings" },
 ] as const;

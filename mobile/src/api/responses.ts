@@ -5,6 +5,7 @@ import type {
   CarList,
   ChargeDetail,
   ChargeList,
+  CostsPage,
   DriveDetail,
   DriveList,
   InsightPage,
@@ -166,6 +167,17 @@ export const insightPage = (value: unknown) =>
       typeof shape.title === "string" &&
       Array.isArray(shape.hero) &&
       Array.isArray(shape.sections),
+  );
+
+export const costsPage = (value: unknown) =>
+  shaped<CostsPage>(
+    value,
+    (shape) =>
+      typeof shape.title === "string" &&
+      Array.isArray(shape.hero) &&
+      Array.isArray(shape.sections) &&
+      Array.isArray(shape.notices) &&
+      typeof shape.period === "string",
   );
 
 export const settingsPage = (value: unknown) =>

@@ -25,6 +25,12 @@ function DrivesLinks() {
         subtitle="Totals and exports for a date range"
         onPress={() => router.push("/drives/report")}
       />
+      <LinkRow
+        icon={icons.costs}
+        title="Costs"
+        subtitle="Driving and charging over time"
+        onPress={() => router.push("/drives/costs")}
+      />
     </>
   );
 }

@@ -50,6 +50,7 @@ describe("parsePreferences", () => {
       charging: true,
       battery: true,
       stats: false,
+      costs: true,
       places: true,
     });
     expect(parsed.overview.tires).toBe(false);

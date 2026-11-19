@@ -4,6 +4,7 @@ import {
   BatteryCharging,
   BatteryMedium,
   ChartNoAxesColumn,
+  CircleDollarSign,
   Gauge,
   MapPin,
   Route,
@@ -22,6 +23,7 @@ const icons: Record<TabId, typeof Gauge> = {
   charging: BatteryCharging,
   battery: BatteryMedium,
   stats: ChartNoAxesColumn,
+  costs: CircleDollarSign,
   places: MapPin,
   settings: Settings,
 };
